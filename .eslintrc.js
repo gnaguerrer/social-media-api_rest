@@ -5,11 +5,11 @@ module.exports = {
     node: true
   },
   extends: 'standard',
-  overrides: [
-  ],
+  overrides: [],
   parserOptions: {
     ecmaVersion: 'latest'
   },
   rules: {
+    semi: [2, 'always']
   }
-}
+};
