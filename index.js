@@ -1,9 +1,6 @@
 const { connection } = require('./database/connection');
 const express = require('express');
 const cors = require('cors');
-const UserRoutes = require('./routes.js/user');
-const FollorRoutes = require('./routes.js/follow');
-const PublicationRoutes = require('./routes.js/publication');
 
 connection();
 const PORT = 3900;
@@ -13,6 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const UserRoutes = require('./routes.js/user');
+const FollorRoutes = require('./routes.js/follow');
+const PublicationRoutes = require('./routes.js/publication');
 
 app.use('/api', UserRoutes);
 app.use('/api', FollorRoutes);
