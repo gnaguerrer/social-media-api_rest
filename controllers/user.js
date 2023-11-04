@@ -43,13 +43,13 @@ const createUser = async (req, res) => {
     params.password = pwd;
 
     const savedUser = await newUser.save();
+    console.log('savedUser :>> ', savedUser);
 
     if (savedUser) {
-      const userData = newUser;
-      delete userData.password;
+      const { passowrd, ...user } = savedUser;
       return res.status(200).json({
         message: 'User created',
-        data: userData
+        data: user
       });
     }
   } catch (error) {
@@ -61,6 +61,46 @@ const createUser = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  let params = req.body;
+  if (!params?.email || !params?.password) {
+    return res.status(400).json({
+      error: true,
+      message: 'Data is missing',
+      data: null
+    });
+  }
+  try {
+    const user = await User.findOne({ email: params?.email }).exec();
+    if (user) {
+      const pwd = bcrypt.compareSync(params.password, user.password);
+      if (!pwd) {
+        return res.status(400).json({
+          error: true,
+          message: 'Incorrect email or password.',
+          data: null
+        });
+      }
+      return res.status(200).json({
+        message: 'Login successfully',
+        data: user
+      });
+    } else {
+      return res.status(404).json({
+        message: 'User not register',
+        data: null
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: 'Unable to login',
+      data: null
+    });
+  }
+};
+
 module.exports = {
-  createUser
+  createUser,
+  login
 };
