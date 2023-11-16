@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const jwt = require('../services/jwt');
 
 const createUser = async (req, res) => {
   let params = req.body;
@@ -43,13 +44,11 @@ const createUser = async (req, res) => {
     params.password = pwd;
 
     const savedUser = await newUser.save();
-    console.log('savedUser :>> ', savedUser);
 
     if (savedUser) {
-      const { passowrd, ...user } = savedUser;
       return res.status(200).json({
         message: 'User created',
-        data: user
+        data: savedUser
       });
     }
   } catch (error) {
@@ -81,9 +80,13 @@ const login = async (req, res) => {
           data: null
         });
       }
+      const token = jwt.createToken(user);
       return res.status(200).json({
         message: 'Login successfully',
-        data: user
+        data: {
+          user,
+          token
+        }
       });
     } else {
       return res.status(404).json({
