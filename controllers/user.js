@@ -2,6 +2,14 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const jwt = require('../services/jwt');
 
+const testingAuth = (req, res) => {
+  return res.status(200).json({
+    error: true,
+    message: 'Testing auth middleware',
+    data: req.user
+  });
+};
+
 const createUser = async (req, res) => {
   let params = req.body;
 
@@ -105,5 +113,6 @@ const login = async (req, res) => {
 
 module.exports = {
   createUser,
-  login
+  login,
+  testingAuth
 };
