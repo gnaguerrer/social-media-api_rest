@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const jwt = require('../services/jwt');
-const mongoosePagination = require('mongoose-pagination');
 
 const createUser = async (req, res) => {
   let params = req.body;
@@ -131,23 +130,31 @@ const getUser = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
-  let page = req?.params?.query ?? 1;
-  page = parseInt(page) - 1;
+  let pageQuery = req?.params?.query ?? 1;
+  pageQuery = parseInt(pageQuery) - 1;
   let itemsPerPage = req?.params?.query ?? 5;
   itemsPerPage = parseInt(itemsPerPage);
   try {
-    const users = await User.find()
-      .select({ password: 0, role: 0 })
-      .sort('_id')
-      .limit(itemsPerPage)
-      .skip(itemsPerPage * page)
-      .exec();
-
+    const users = await User.paginate(
+      {},
+      { page: pageQuery, limit: itemsPerPage }
+    );
+    if (!users) {
+      return res.status(400).json({
+        error: true,
+        message: 'Unable to get user list',
+        data: null
+      });
+    }
+    const { docs, limit, totalDocs, ...rest } = users;
     return res.status(200).json({
-      data: users,
-      page
+      data: docs,
+      itemsPerPage: limit,
+      total: totalDocs,
+      ...rest
     });
   } catch (error) {
+    console.log('error', error);
     return res.status(500).json({
       error: true,
       message: 'Unable to get user list',
