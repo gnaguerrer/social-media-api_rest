@@ -3,7 +3,7 @@ const User = require('../models/user');
 const jwt = require('../services/jwt');
 
 const createUser = async (req, res) => {
-  let params = req.body;
+  const params = req.body;
 
   if (
     !params?.name ||
@@ -18,7 +18,7 @@ const createUser = async (req, res) => {
     });
   }
   try {
-    let newUser = new User(params);
+    const newUser = new User(params);
 
     const users = await User.find({
       $or: [
@@ -105,8 +105,9 @@ const login = async (req, res) => {
 
 const getUser = async (req, res) => {
   const id = req?.params?.id;
+  const body = req.body;
   try {
-    const user = await User.findById(id)
+    const user = await User.findById(id, body)
       .select({ password: 0, role: 0 })
       .exec();
     if (!user) {
@@ -163,9 +164,41 @@ const getUsers = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  const id = req?.params?.id;
+  return res.status(200).json({
+    message: 'User updated successfully',
+    data: id
+  });
+  // try {
+  //   const user = await User.findByIdAndUpdate(id);
+  //   console.log('user', user);
+  //   if (!user) {
+  //     return res.status(400).json({
+  //       error: true,
+  //       message: 'Unable to update user',
+  //       data: null
+  //     });
+  //   }
+
+  //   return res.status(200).json({
+  //     message: 'User updated successfully',
+  //     data: user
+  //   });
+  // } catch (error) {
+  //   console.log('error', error);
+  //   return res.status(500).json({
+  //     error: true,
+  //     message: 'Unable to update user',
+  //     data: null
+  //   });
+  // }
+};
+
 module.exports = {
   createUser,
   login,
   getUser,
-  getUsers
+  getUsers,
+  updateUser
 };
