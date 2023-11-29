@@ -105,9 +105,8 @@ const login = async (req, res) => {
 
 const getUser = async (req, res) => {
   const id = req?.params?.id;
-  const body = req.body;
   try {
-    const user = await User.findById(id, body)
+    const user = await User.findById(id)
       .select({ password: 0, role: 0 })
       .exec();
     if (!user) {
@@ -138,7 +137,7 @@ const getUsers = async (req, res) => {
   try {
     const users = await User.paginate(
       {},
-      { page: pageQuery, limit: itemsPerPage }
+      { page: pageQuery, limit: itemsPerPage, select: { password: 0, role: 0 } }
     );
     if (!users) {
       return res.status(400).json({
@@ -165,34 +164,34 @@ const getUsers = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const id = req?.params?.id;
-  return res.status(200).json({
-    message: 'User updated successfully',
-    data: id
-  });
-  // try {
-  //   const user = await User.findByIdAndUpdate(id);
-  //   console.log('user', user);
-  //   if (!user) {
-  //     return res.status(400).json({
-  //       error: true,
-  //       message: 'Unable to update user',
-  //       data: null
-  //     });
-  //   }
+  const id = req?.params?.id ?? req.user.id;
+  const body = req.body;
+  let newData = {};
+  try {
+    const user = await User.findByIdAndUpdate(id, newData).select({
+      password: 0,
+      role: 0
+    });
+    if (!user) {
+      return res.status(400).json({
+        error: true,
+        message: 'Unable to update user',
+        data: null
+      });
+    }
 
-  //   return res.status(200).json({
-  //     message: 'User updated successfully',
-  //     data: user
-  //   });
-  // } catch (error) {
-  //   console.log('error', error);
-  //   return res.status(500).json({
-  //     error: true,
-  //     message: 'Unable to update user',
-  //     data: null
-  //   });
-  // }
+    return res.status(200).json({
+      message: 'User updated successfully',
+      data: user
+    });
+  } catch (error) {
+    console.log('error', error);
+    return res.status(500).json({
+      error: true,
+      message: 'Unable to update user',
+      data: null
+    });
+  }
 };
 
 module.exports = {
