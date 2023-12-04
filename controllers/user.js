@@ -165,7 +165,7 @@ const getUsers = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const id = req?.params?.id ?? req.user.id;
-  const newData = req.body;
+  let newData = req.body;
 
   let userIdentity = null;
   if (!req?.params?.id) {
@@ -202,6 +202,11 @@ const updateUser = async (req, res) => {
         message: 'Unable to update user. Email or nickname already exist',
         data: null
       });
+    }
+
+    if (newData?.password) {
+      const pwd = await bcrypt.hash(newData.password, 10);
+      newData.password = pwd;
     }
 
     const user = await User.findByIdAndUpdate(id, newData, {
