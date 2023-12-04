@@ -26,7 +26,7 @@ const createUser = async (req, res) => {
           email: newUser.email.toLowerCase()
         },
         {
-          nickname: newUser.nickname
+          nickname: newUser.nickname.toLowerCase()
         }
       ]
     }).exec();
@@ -165,10 +165,48 @@ const getUsers = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const id = req?.params?.id ?? req.user.id;
-  const body = req.body;
-  let newData = {};
+  const newData = req.body;
+
+  let userIdentity = null;
+  if (!req?.params?.id) {
+    userIdentity = req.user;
+    delete userIdentity.image;
+    delete userIdentity.iat;
+    delete userIdentity.exp;
+    delete userIdentity.role;
+  }
+
   try {
-    const user = await User.findByIdAndUpdate(id, newData).select({
+    let userIsset = false;
+
+    const users = await User.find({
+      $or: [
+        {
+          email: newData.email.toLowerCase()
+        },
+        {
+          nickname: newData.nickname.toLowerCase()
+        }
+      ]
+    }).exec();
+
+    users.forEach((user) => {
+      if (user?._id.toString() !== userIdentity.id) {
+        userIsset = true;
+      }
+    });
+
+    if (userIsset) {
+      return res.status(400).json({
+        error: true,
+        message: 'Unable to update user. Email or nickname already exist',
+        data: null
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(id, newData, {
+      new: true
+    }).select({
       password: 0,
       role: 0
     });
@@ -176,7 +214,7 @@ const updateUser = async (req, res) => {
       return res.status(400).json({
         error: true,
         message: 'Unable to update user',
-        data: null
+        data: userIdentity
       });
     }
 
