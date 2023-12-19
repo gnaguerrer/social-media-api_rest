@@ -215,6 +215,7 @@ const updateUser = async (req, res) => {
       password: 0,
       role: 0
     });
+
     if (!user) {
       return res.status(400).json({
         error: true,
@@ -228,7 +229,6 @@ const updateUser = async (req, res) => {
       data: user
     });
   } catch (error) {
-    console.log('error', error);
     return res.status(500).json({
       error: true,
       message: 'Unable to update user',
@@ -237,10 +237,13 @@ const updateUser = async (req, res) => {
   }
 };
 
+const updateImage = async (req, res) => {};
+
 module.exports = {
   createUser,
   login,
   getUser,
   getUsers,
-  updateUser
+  updateUser,
+  updateImage
 };
