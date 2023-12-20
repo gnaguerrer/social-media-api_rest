@@ -11,12 +11,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const UserRoutes = require('./routes.js/user');
-const FollorRoutes = require('./routes.js/follow');
-const PublicationRoutes = require('./routes.js/publication');
+const UserRoutes = require('./routes/user');
+const FollorRoutes = require('./routes/follow');
+const PublicationRoutes = require('./routes/publication');
 
 app.use('/api', UserRoutes);
-app.use('/api', FollorRoutes);
+app.use('/api/follow', FollorRoutes);
 app.use('/api', PublicationRoutes);
 
 app.get('/', (_, res) => {

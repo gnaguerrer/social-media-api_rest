@@ -62,7 +62,7 @@ const createUser = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  let params = req.body;
+  const params = req.body;
   if (!params?.email || !params?.password) {
     return res.status(400).json({
       error: true,
