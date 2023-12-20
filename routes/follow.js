@@ -5,4 +5,5 @@ const FollowController = require('../controllers/follow');
 
 module.exports = router;
 
-router.post('/save', middleware.auth, FollowController.userFollow);
+router.post('/', middleware.auth, FollowController.userFollow);
+router.delete('/:id', middleware.auth, FollowController.userUnfollow);
