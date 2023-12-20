@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 const User = require('../models/user');
 const jwt = require('../services/jwt');
 
@@ -154,7 +155,6 @@ const getUsers = async (req, res) => {
       ...rest
     });
   } catch (error) {
-    console.log('error', error);
     return res.status(500).json({
       error: true,
       message: 'Unable to get user list',
@@ -165,7 +165,7 @@ const getUsers = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const id = req?.params?.id ?? req.user.id;
-  let newData = req.body;
+  const newData = req.body;
 
   let userIdentity = null;
   if (!req?.params?.id) {
@@ -237,7 +237,58 @@ const updateUser = async (req, res) => {
   }
 };
 
-const updateImage = async (req, res) => {};
+const updateImage = async (req, res) => {
+  try {
+    if (!req?.file) {
+      return res.status(400).send({
+        message: 'Image is missing',
+        error: true,
+        data: null
+      });
+    }
+
+    const image = req.file.originalname;
+    const imageSplit = image?.split?.('.');
+    const extension = imageSplit[1];
+    if (extension !== 'png' && extension !== 'jpg' && extension !== 'jpeg') {
+      fs.unlink(req.file.path, () => {});
+      return res.status(400).json({
+        error: true,
+        message: 'Extension not allowed',
+        data: null
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        image: req.file.filename
+      },
+      { new: true }
+    ).select({
+      password: 0,
+      role: 0
+    });
+
+    if (!updatedUser) {
+      return res.status(500).send({
+        message: 'Unable to upload image',
+        user: updatedUser
+      });
+    }
+
+    return res.status(200).send({
+      message: 'Image uploaded successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: true,
+      message: 'Unable to upload image',
+      data: null
+    });
+  }
+};
 
 module.exports = {
   createUser,
