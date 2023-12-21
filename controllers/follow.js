@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Follow = require('../models/follow');
 const User = require('../models/user');
+const followService = require('../services/followService');
 
 const userFollow = async (req, res) => {
   const followed = req?.body?.followed;
@@ -11,8 +12,7 @@ const userFollow = async (req, res) => {
       user: currentUser.id,
       followed
     });
-
-    if (!existFollow) {
+    if (!existFollow?.length) {
       const userToFollow = new Follow({
         user: currentUser.id,
         followed
@@ -100,9 +100,17 @@ const getFollowing = async (req, res) => {
         }
       }
     );
+    const follows = await followService.getFollowsIds(userId);
+
     const { docs, limit, totalDocs, ...rest } = following;
+
     return res.status(200).json({
-      data: docs.map((item) => item.followed),
+      data: docs.map((item) => ({
+        ...item._doc,
+        isFollowing: !!follows.following.find((follows) =>
+          follows.followed.equals(item._doc.followed._id)
+        )
+      })),
       itemsPerPage: limit,
       total: totalDocs,
       ...rest
