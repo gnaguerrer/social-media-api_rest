@@ -27,6 +27,40 @@ const getFollowsIds = async (userId) => {
   };
 };
 
+const userFollowTracker = async (currentUserId, awayUserId) => {
+  let following = false;
+  let followers = false;
+  try {
+    following = await Follow.findOne({
+      user: currentUserId,
+      followed: awayUserId
+    })
+      .select({
+        followed: 1,
+        _id: 0
+      })
+      .exec();
+    followers = await Follow.findOne({
+      user: awayUserId,
+      followed: currentUserId
+    })
+      .select({
+        user: 1,
+        _id: 0
+      })
+      .exec();
+  } catch (error) {
+    following = false;
+    followers = false;
+  }
+
+  return {
+    following,
+    followers
+  };
+};
+
 module.exports = {
-  getFollowsIds
+  getFollowsIds,
+  userFollowTracker
 };

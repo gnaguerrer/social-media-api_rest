@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const User = require('../models/user');
 const jwt = require('../services/jwt');
+const followService = require('../services/followService');
 
 const createUser = async (req, res) => {
   const params = req.body;
@@ -117,9 +118,15 @@ const getUser = async (req, res) => {
         data: null
       });
     }
+    console.log('user :>> ', user);
+    const followInfo = await followService.userFollowTracker(req.user.id, id);
     return res.status(200).json({
       message: 'User found successfully',
-      data: user
+      data: {
+        ...user._doc,
+        following: followInfo.following,
+        follwer: followInfo.followers
+      }
     });
   } catch (error) {
     return res.status(500).json({
