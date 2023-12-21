@@ -108,7 +108,10 @@ const getFollowing = async (req, res) => {
       data: docs.map((item) => ({
         ...item._doc,
         isFollowing: !!follows.following.find((follows) =>
-          follows.followed.equals(item._doc.followed._id)
+          follows.equals(item._doc.followed._id)
+        ),
+        isFollower: !!follows.followers.find((follows) =>
+          follows.equals(item._doc.followed._id)
         )
       })),
       itemsPerPage: limit,

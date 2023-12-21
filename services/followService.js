@@ -10,13 +10,20 @@ const getFollowsIds = async (userId) => {
         _id: 0
       })
       .exec();
+    followers = await Follow.find({ followed: userId })
+      .select({
+        user: 1,
+        _id: 0
+      })
+      .exec();
   } catch (error) {
     following = [];
+    followers = [];
   }
 
   return {
-    following,
-    followers
+    following: following.map((item) => item.followed),
+    followers: followers.map((item) => item.user)
   };
 };
 
