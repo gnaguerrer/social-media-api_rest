@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Follow = require('../models/follow');
 const User = require('../models/user');
 
@@ -66,7 +67,6 @@ const userUnfollow = async (req, res) => {
       data: null
     });
   } catch (error) {
-    console.log('error :>> ', error);
     return res.status(500).json({
       message: 'Unable to unfollow user',
       error: true,
@@ -75,7 +75,57 @@ const userUnfollow = async (req, res) => {
   }
 };
 
+const getFollowing = async (req, res) => {
+  const userId = req?.query?.userId ?? req.user.id;
+  const page = parseInt(req?.query?.page) > 0 ? parseInt(req?.query?.page) : 1;
+
+  if (!mongoose.isValidObjectId(userId)) {
+    return res.status(400).json({
+      message: 'Invalid id',
+      data: null,
+      error: true
+    });
+  }
+
+  try {
+    const following = await Follow.paginate(
+      { user: userId },
+      {
+        page,
+        limit: 5,
+        select: { _id: 0, __v: 0, created_at: 0 },
+        populate: {
+          path: 'followed',
+          select: { password: 0, role: 0, __v: 0 }
+        }
+      }
+    );
+    const { docs, limit, totalDocs, ...rest } = following;
+    return res.status(200).json({
+      data: docs.map((item) => item.followed),
+      itemsPerPage: limit,
+      total: totalDocs,
+      ...rest
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Unable to get following',
+      error: true,
+      data: null
+    });
+  }
+};
+
+const getFollowers = async (req, res) => {
+  return res.status(200).json({
+    message: 'Follower list',
+    data: []
+  });
+};
+
 module.exports = {
   userFollow,
-  userUnfollow
+  userUnfollow,
+  getFollowing,
+  getFollowers
 };
