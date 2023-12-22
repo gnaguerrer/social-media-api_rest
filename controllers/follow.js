@@ -7,6 +7,14 @@ const userFollow = async (req, res) => {
   const followed = req?.body?.followed;
   const currentUser = req?.user;
 
+  if (followed === currentUser.id) {
+    return res.status(400).json({
+      message: 'You can not follow yourself',
+      error: true,
+      data: null
+    });
+  }
+
   try {
     const existFollow = await Follow.find({
       user: currentUser.id,
@@ -49,6 +57,14 @@ const userFollow = async (req, res) => {
 const userUnfollow = async (req, res) => {
   const unfollowId = req?.params?.id;
   const currentUser = req?.user;
+
+  if (unfollowId === currentUser.id) {
+    return res.status(400).json({
+      message: 'You can not unfollow yourself',
+      error: true,
+      data: null
+    });
+  }
 
   try {
     const currentFollow = await Follow.findOneAndDelete({
