@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Follow = require('../models/follow');
-const User = require('../models/user');
 const followService = require('../services/followService');
 
 const userFollow = async (req, res) => {
